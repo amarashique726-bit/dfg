@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f4ee">
+    <title>Fieldnotes — Classical Cipher Lab</title>
+    <style>
+        [hidden] {
+            display: none !important;
+        }
+
+        :root {
+            color-scheme: light;
+            --paper: #f5f4ee;
+            --ink: #202820;
+            --muted: #69716a;
+            --line: #d8d9d0;
+            --green: #285d49;
+            --green-soft: #e3ebe4;
+            --orange: #bc5338;
+            --white: #fffefa;
+            --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+            --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image: linear-gradient(90deg, transparent 39px, rgba(40, 93, 73, .045) 40px, transparent 41px), linear-gradient(rgba(40, 93, 73, .035) 1px, transparent 1px);
+            background-size: 80px 100%, 100% 32px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        button,
+        textarea,
+        input {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+        }
+
+        .shell {
+            max-width: 1160px;
+            margin: auto;
+            padding: 0 38px 72px;
+        }
+
+        .topbar {
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: flex;
+            gap: 11px;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 27px;
+            height: 27px;
+            place-items: center;
+            color: var(--white);
+            background: var(--green);
+            font: 700 13px var(--mono);
+        }
+
+        .top-note {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .intro {
+            padding: 40px 0 29px;
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            align-items: end;
+        }
+
+        .eyebrow {
+            margin: 0 0 8px;
+            color: var(--orange);
+            font: 700 10px var(--mono);
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font: 400 39px/1.08 var(--serif);
+            letter-spacing: 0;
+        }
+
+        .intro-copy {
+            max-width: 340px;
+            margin: 0 0 3px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 216px minmax(0, 1fr);
+            border: 1px solid var(--line);
+            background: rgba(255, 254, 250, .77);
+        }
+
+        .rail {
+            padding: 20px 13px;
+            border-right: 1px solid var(--line);
+        }
+
+        .rail-label,
+        .section-kicker {
+            margin: 0 0 12px 5px;
+            color: var(--muted);
+            font: 700 10px var(--mono);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        .cipher-list {
+            display: grid;
+            gap: 4px;
+        }
+
+        .cipher-tab {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .cipher-tab:hover {
+            background: #eeefe9;
+        }
+
+        .cipher-tab[aria-pressed="true"] {
+            border-color: #cbd8ce;
+            background: var(--green-soft);
+        }
+
+        .tab-number {
+            color: #89928a;
+            font: 11px var(--mono);
+        }
+
+        .tab-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .rail-foot {
+            margin: 27px 5px 0;
+            padding-top: 15px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .bench {
+            min-width: 0;
+            padding: 21px 23px 24px;
+        }
+
+        .bench-head {
+            display: flex;
+            align-items: start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 19px;
+        }
+
+        h2 {
+            margin: 0;
+            font: 400 25px/1.2 var(--serif);
+        }
+
+        .cipher-description {
+            max-width: 440px;
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .mode-switch {
+            display: flex;
+            flex: none;
+            padding: 3px;
+            border: 1px solid var(--line);
+            background: var(--paper);
+        }
+
+        .mode-button {
+            padding: 6px 10px;
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mode-button[aria-pressed="true"] {
+            background: var(--white);
+            color: var(--green);
+            box-shadow: 0 0 0 1px var(--line);
+        }
+
+        .key-row {
+            min-height: 65px;
+            display: flex;
+            align-items: start;
+            gap: 13px;
+            padding: 12px 0 14px;
+            border-top: 1px solid var(--line);
+        }
+
+        .key-label {
+            width: 76px;
+            flex: none;
+            padding-top: 8px;
+            color: var(--muted);
+            font: 700 10px var(--mono);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .key-control {
+            min-width: 0;
+        }
+
+        .key-control input {
+            width: 210px;
+            max-width: 100%;
+            padding: 7px 9px;
+            border: 1px solid var(--line);
+            border-radius: 0;
+            background: var(--white);
+            outline: none;
+        }
+
+        .key-control input:focus,
+        textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 2px rgba(40, 93, 73, .12);
+        }
+
+        .key-hint {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .key-matrix {
+            display: inline-flex;
+            gap: 5px;
+            align-items: center;
+            font: 11px var(--mono);
+        }
+
+        .key-matrix input {
+            width: 42px;
+            text-align: center;
+        }
+
+        .text-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--line);
+        }
+
+        .text-panel {
+            min-width: 0;
+        }
+
+        .text-panel+.text-panel {
+            border-left: 1px solid var(--line);
+        }
+
+        .panel-head {
+            display: flex;
+            min-height: 37px;
+            padding: 8px 11px;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font: 700 10px var(--mono);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+
+        .panel-head small {
+            font: 10px "Trebuchet MS", "Segoe UI", sans-serif;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        textarea {
+            display: block;
+            width: 100%;
+            height: 160px;
+            resize: vertical;
+            padding: 13px;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            color: var(--ink);
+            outline: none;
+            font: 13px/1.7 var(--mono);
+        }
+
+        #output {
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .panel-footer {
+            height: 33px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .text-button {
+            padding: 4px 0;
+            border: 0;
+            background: transparent;
+            color: var(--green);
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .text-button:hover {
+            text-decoration: underline;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-top: 13px;
+        }
+
+        .primary-button {
+            min-width: 136px;
+            padding: 10px 16px;
+            border: 1px solid var(--green);
+            background: var(--green);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .primary-button:hover {
+            background: #1f4b3a;
+        }
+
+        .error {
+            min-height: 19px;
+            margin: 0;
+            color: var(--orange);
+            font-size: 11px;
+        }
+
+        .comparison {
+            padding-top: 31px;
+        }
+
+        .comparison-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 9px;
+        }
+
+        .comparison h2 {
+            font-size: 21px;
+        }
+
+        .comparison-caption {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .compare-item {
+            min-width: 0;
+            padding: 14px 12px 0 0;
+        }
+
+        .compare-item+.compare-item {
+            padding-left: 12px;
+            border-left: 1px solid var(--line);
+        }
+
+        .compare-name {
+            margin: 0 0 6px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .risk {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            color: var(--orange);
+            font: 700 9px var(--mono);
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        .risk-bars {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .risk-bars i {
+            display: block;
+            width: 10px;
+            height: 4px;
+            background: #d8d9d0;
+        }
+
+        .risk-bars i.on {
+            background: var(--orange);
+        }
+
+        .compare-item p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.55;
+        }
+
+        .disclaimer {
+            display: flex;
+            gap: 10px;
+            margin-top: 23px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .disclaimer strong {
+            color: var(--orange);
+            white-space: nowrap;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--orange);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 760px) {
+            .shell {
+                padding: 0 18px 45px;
+            }
+
+            .intro {
+                padding-top: 30px;
+                align-items: start;
+                flex-direction: column;
+                gap: 11px;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+            .intro-copy {
+                max-width: 520px;
+            }
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .rail {
+                padding: 12px;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .rail-label {
+                margin-bottom: 8px;
+            }
+
+            .cipher-list {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .cipher-tab {
+                display: grid;
+                justify-items: center;
+                gap: 3px;
+                padding: 8px 3px;
+            }
+
+            .tab-name {
+                font-size: 10px;
+            }
+
+            .rail-foot {
+                display: none;
+            }
+
+            .bench {
+                padding: 17px 14px 19px;
+            }
+
+            .bench-head {
+                flex-direction: column;
+            }
+
+            .mode-switch {
+                align-self: start;
+            }
+
+            .comparison-grid {
+                grid-template-columns: repeat(2, 1fr);
+                row-gap: 16px;
+            }
+
+            .compare-item:nth-child(odd) {
+                padding-left: 0;
+                border-left: 0;
+            }
+
+            .compare-item:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .top-note {
+                max-width: 130px;
+                text-align: right;
+                font-size: 9px;
+            }
+
+            .text-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .text-panel+.text-panel {
+                border-left: 0;
+                border-top: 1px solid var(--line);
+            }
+
+            textarea {
+                height: 125px;
+            }
+
+            .key-label {
+                width: 58px;
+            }
+
+            .comparison-head {
+                align-items: start;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .disclaimer {
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="brand"><span class="brand-mark" aria-hidden="true">F.</span> Fieldnotes / Cipher lab</div>
+            <div class="top-note">A study of classical cryptography</div>
+        </header>
+
+        <main>
+            <section class="intro" aria-labelledby="page-title">
+                <div>
+                    <p class="eyebrow">Workshop 01 &nbsp;·&nbsp; Secret writing</p>
+                    <h1 id="page-title">Classical cipher lab</h1>
+                </div>
+                <p class="intro-copy">Encrypt, decrypt, and compare five historical methods. Explore the mechanics;
+                    understand why none belong in modern security.</p>
+            </section>
+
+            <section class="workspace" aria-label="Cipher workbench">
+                <nav class="rail" aria-label="Choose a cipher">
+                    <p class="rail-label">Methods</p>
+                    <div class="cipher-list" id="cipher-list"></div>
+                    <p class="rail-foot">Select a method to inspect its key and transform a message.</p>
+                </nav>
+
+                <div class="bench">
+                    <div class="bench-head">
+                        <div>
+                            <h2 id="cipher-title"></h2>
+                            <p class="cipher-description" id="cipher-description"></p>
+                        </div>
+                        <div class="mode-switch" role="group" aria-label="Operation">
+                            <button class="mode-button" data-mode="encrypt" aria-pressed="true">Encrypt</button>
+                            <button class="mode-button" data-mode="decrypt" aria-pressed="false">Decrypt</button>
+                        </div>
+                    </div>
+                    <div class="key-row" id="key-row"><label class="key-label" id="key-label"
+                            for="key-input">Key</label>
+                        <div class="key-control" id="key-control"></div>
+                    </div>
+                    <div class="text-grid">
+                        <div class="text-panel">
+                            <div class="panel-head"><span id="input-label">Plaintext</span><small
+                                    id="input-hint"></small></div>
+                            <textarea id="input" aria-label="Plaintext" spellcheck="false"
+                                placeholder="Type a message..."></textarea>
+                            <div class="panel-footer"><span id="char-count">0 characters</span><button
+                                    class="text-button" id="clear-button" type="button">Clear</button></div>
+                        </div>
+                        <div class="text-panel">
+                            <div class="panel-head"><span id="output-label">Ciphertext</span><button class="text-button"
+                                    id="copy-button" type="button">Copy</button></div>
+                            <textarea id="output" aria-label="Ciphertext" readonly
+                                placeholder="Your result appears here"></textarea>
+                            <div class="panel-footer"><span id="result-note">Ready</span><span id="output-count">0
+                                    characters</span></div>
+                        </div>
+                    </div>
+                    <div class="actions"><button class="primary-button" id="run-button" type="button">Encrypt
+                            message</button>
+                        <p class="error" id="error" role="alert" aria-live="polite"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="comparison" aria-labelledby="comparison-title">
+                <div class="comparison-head">
+                    <h2 id="comparison-title">Security at a glance</h2><span class="comparison-caption">Relative
+                        resistance to basic analysis · all are breakable</span>
+                </div>
+                <div class="comparison-grid" id="comparison-grid"></div>
+                <div class="disclaimer"><strong>Historical, not secure.</strong><span>These ciphers provide no
+                        meaningful protection for real data. Modern systems use vetted algorithms such as AES-GCM or
+                        ChaCha20-Poly1305, with proper key management.</span></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        (() => {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const polybiusAlphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+            const definitions = [
+                { id: "caesar", name: "Caesar", description: "Shifts each letter by a fixed number of places. Punctuation and letter case are preserved.", risk: 1, riskLabel: "Trivial", weakness: "Only 25 useful shifts; a complete key search takes seconds." },
+                { id: "mono", name: "Monoalphabetic", description: "Replaces each letter with a fixed partner from a shuffled alphabet. Case and punctuation are preserved.", risk: 2, riskLabel: "Very weak", weakness: "A large keyspace, but letter-frequency patterns survive unchanged." },
+                { id: "playfair", name: "Playfair", description: "Encrypts letter pairs using a 5 × 5 keyword square; I and J share one cell. X is used as filler.", risk: 3, riskLabel: "Weak", weakness: "Hides single-letter counts, but digram patterns and short messages leak structure." },
+                { id: "hill", name: "Hill", description: "Transforms letter pairs with a 2 × 2 matrix modulo 26. The key must have an invertible determinant.", risk: 4, riskLabel: "Weak", weakness: "Linear algebra breaks it with enough known plaintext; this tool uses only a 2 × 2 key." },
+                { id: "polybius", name: "Polybius", description: "Maps each letter to row and column coordinates in a 5 × 5 square. I and J share one cell.", risk: 1, riskLabel: "Trivial", weakness: "A coordinate encoding, not encryption; it offers no secrecy at all." }
+            ];
+            const keys = { caesar: "3", mono: "QWERTYUIOPASDFGHJKLZXCVBNM", playfair: "MONARCHY", hill: ["3", "3", "2", "5"] };
+            let selected = "caesar";
+            let mode = "encrypt";
+            const byId = (id) => document.getElementById(id);
+            const mod = (value, base) => ((value % base) + base) % base;
+
+            function letters(text) { return text.toUpperCase().replace(/[^A-Z]/g, ""); }
+            function setError(message) { byId("error").textContent = message; }
+            function describeCount(element, count) { element.textContent = `${count} character${count === 1 ? "" : "s"}`; }
+            function currentDefinition() { return definitions.find((item) => item.id === selected); }
+
+            function renderNavigation() {
+                byId("cipher-list").innerHTML = definitions.map((item, index) => `<button class="cipher-tab" type="button" data-cipher="${item.id}" aria-pressed="${selected === item.id}"><span class="tab-number">0${index + 1}</span><span class="tab-name">${item.name}</span></button>`).join("");
+                document.querySelectorAll(".cipher-tab").forEach((button) => button.addEventListener("click", () => selectCipher(button.dataset.cipher)));
+            }
+
+            function renderComparison() {
+                byId("comparison-grid").innerHTML = definitions.map((item) => `<article class="compare-item"><h3 class="compare-name">${item.name}</h3><div class="risk"><span class="risk-bars" aria-label="Risk ${item.risk} of 5">${Array.from({ length: 5 }, (_, index) => `<i class="${index < item.risk ? "on" : ""}"></i>`).join("")}</span>${item.riskLabel}</div><p>${item.weakness}</p></article>`).join("");
+            }
+
+            function renderKey() {
+                const host = byId("key-control");
+                byId("key-row").hidden = selected === "polybius";
+                if (selected === "polybius") { host.innerHTML = ""; return; }
+                if (selected === "hill") {
+                    host.innerHTML = `<div class="key-matrix" aria-label="2 by 2 key matrix">⎡ <input aria-label="Matrix row 1 column 1" inputmode="numeric" data-matrix="0" value="${keys.hill[0]}"><input aria-label="Matrix row 1 column 2" inputmode="numeric" data-matrix="1" value="${keys.hill[1]}"> ⎤<br>⎣ <input aria-label="Matrix row 2 column 1" inputmode="numeric" data-matrix="2" value="${keys.hill[2]}"><input aria-label="Matrix row 2 column 2" inputmode="numeric" data-matrix="3" value="${keys.hill[3]}"> ⎦</div><p class="key-hint">Integers modulo 26; determinant must be coprime to 26.</p>`;
+                    host.querySelectorAll("input").forEach((input) => input.addEventListener("input", () => { keys.hill[Number(input.dataset.matrix)] = input.value; }));
+                    return;
+                }
+                const config = {
+                    caesar: { label: "Shift", value: keys.caesar, hint: "Whole number; negative and large shifts wrap around.", type: "number" },
+                    mono: { label: "Substitution", value: keys.mono, hint: "Enter each A–Z letter once to define its replacement.", type: "text" },
+                    playfair: { label: "Keyword", value: keys.playfair, hint: "Letters only; repeated letters are ignored.", type: "text" }
+                }[selected];
+                byId("key-label").textContent = config.label;
+                byId("key-label").htmlFor = "key-input";
+                host.innerHTML = `<input id="key-input" type="${config.type}" value="${config.value}" aria-label="${config.label}" ${selected === "caesar" ? "step=1" : "autocapitalize=characters"}><p class="key-hint">${config.hint}</p>`;
+                byId("key-input").addEventListener("input", (event) => { keys[selected] = event.target.value; });
+            }
+
+            function selectCipher(id) {
+                selected = id;
+                const item = currentDefinition();
+                byId("cipher-title").textContent = item.name;
+                byId("cipher-description").textContent = item.description;
+                byId("input").placeholder = id === "polybius" && mode === "decrypt" ? "Enter coordinate pairs, e.g. 11 12 13..." : "Type a message...";
+                renderNavigation();
+                renderKey();
+                setError("");
+                byId("output").value = "";
+                byId("result-note").textContent = "Ready";
+                updateLabels();
+            }
+
+            function updateLabels() {
+                const decrypting = mode === "decrypt";
+                byId("input-label").textContent = decrypting ? "Ciphertext" : "Plaintext";
+                byId("output-label").textContent = decrypting ? "Plaintext" : "Ciphertext";
+                byId("input").setAttribute("aria-label", decrypting ? "Ciphertext" : "Plaintext");
+                byId("output").setAttribute("aria-label", decrypting ? "Plaintext" : "Ciphertext");
+                byId("run-button").textContent = `${decrypting ? "Decrypt" : "Encrypt"} message`;
+                byId("input").placeholder = selected === "polybius" && decrypting ? "Enter coordinate pairs, e.g. 11 12 13..." : "Type a message...";
+            }
+
+            function transformCaesar(text, decrypt) {
+                const raw = Number(keys.caesar);
+                if (!Number.isInteger(raw)) throw new Error("Enter a whole-number shift key.");
+                const shift = mod(raw * (decrypt ? -1 : 1), 26);
+                return text.replace(/[A-Za-z]/g, (character) => {
+                    const base = character === character.toUpperCase() ? 65 : 97;
+                    return String.fromCharCode(base + mod(character.charCodeAt(0) - base + shift, 26));
+                });
+            }
+
+            function transformMono(text, decrypt) {
+                const key = letters(keys.mono);
+                if (key.length !== 26 || new Set(key).size !== 26) throw new Error("The substitution key must contain every A–Z letter exactly once.");
+                const source = decrypt ? key : alphabet;
+                const target = decrypt ? alphabet : key;
+                return text.replace(/[A-Za-z]/g, (character) => {
+                    const base = character === character.toUpperCase() ? 65 : 97;
+                    const index = source.indexOf(character.toUpperCase());
+                    return String.fromCharCode(base + target.charCodeAt(index) - 65);
+                });
+            }
+
+            function playfairSquare() {
+                const key = letters(keys.playfair).replace(/J/g, "I");
+                const sequence = [...new Set((key + alphabet.replace(/J/g, "")).split(""))];
+                return sequence;
+            }
+
+            function transformPlayfair(text, decrypt) {
+                const square = playfairSquare();
+                const positions = new Map(square.map((letter, index) => [letter, [Math.floor(index / 5), index % 5]]));
+                const source = letters(text).replace(/J/g, "I");
+                if (decrypt && source.length % 2 !== 0) throw new Error("Playfair ciphertext must contain an even number of letters.");
+                const pairs = [];
+                if (decrypt) {
+                    for (let i = 0; i < source.length; i += 2) pairs.push([source[i], source[i + 1]]);
+                } else {
+                    for (let i = 0; i < source.length;) {
+                        const first = source[i];
+                        const second = source[i + 1];
+                        if (!second) { pairs.push([first, first === "X" ? "Q" : "X"]); i++; }
+                        else if (first === second) { pairs.push([first, first === "X" ? "Q" : "X"]); i++; }
+                        else { pairs.push([first, second]); i += 2; }
+                    }
+                }
+                const step = decrypt ? 4 : 1;
+                return pairs.map(([first, second]) => {
+                    const [rowA, colA] = positions.get(first);
+                    const [rowB, colB] = positions.get(second);
+                    if (rowA === rowB) return square[rowA * 5 + mod(colA + step, 5)] + square[rowB * 5 + mod(colB + step, 5)];
+                    if (colA === colB) return square[mod(rowA + step, 5) * 5 + colA] + square[mod(rowB + step, 5) * 5 + colB];
+                    return square[rowA * 5 + colB] + square[rowB * 5 + colA];
+                }).join("");
+            }
+
+            function hillKey() {
+                const matrix = keys.hill.map((value) => {
+                    if (!/^[-+]?\d+$/.test(String(value).trim())) throw new Error("All four Hill key entries must be integers.");
+                    return mod(Number(value), 26);
+                });
+                const determinant = mod(matrix[0] * matrix[3] - matrix[1] * matrix[2], 26);
+                let inverseDeterminant = -1;
+                for (let candidate = 0; candidate < 26; candidate++) if (mod(determinant * candidate, 26) === 1) inverseDeterminant = candidate;
+                if (inverseDeterminant < 0) throw new Error("This Hill key is not invertible modulo 26. Choose a matrix whose determinant is coprime to 26.");
+                return { matrix, inverse: [matrix[3] * inverseDeterminant, -matrix[1] * inverseDeterminant, -matrix[2] * inverseDeterminant, matrix[0] * inverseDeterminant].map((value) => mod(value, 26)) };
+            }
+
+            function transformHill(text, decrypt) {
+                const { matrix, inverse } = hillKey();
+                let source = letters(text);
+                if (decrypt && source.length % 2 !== 0) throw new Error("Hill ciphertext must contain an even number of letters.");
+                if (!decrypt && source.length % 2 !== 0) source += "X";
+                const key = decrypt ? inverse : matrix;
+                let result = "";
+                for (let i = 0; i < source.length; i += 2) {
+                    const first = source.charCodeAt(i) - 65;
+                    const second = source.charCodeAt(i + 1) - 65;
+                    result += alphabet[mod(key[0] * first + key[1] * second, 26)];
+                    result += alphabet[mod(key[2] * first + key[3] * second, 26)];
+                }
+                return result;
+            }
+
+            function transformPolybius(text, decrypt) {
+                if (!decrypt) {
+                    return letters(text).replace(/J/g, "I").split("").map((letter) => {
+                        const index = polybiusAlphabet.indexOf(letter);
+                        return `${Math.floor(index / 5) + 1}${(index % 5) + 1}`;
+                    }).join(" ");
+                }
+                if (!/^[\d\s,;|.-]*$/.test(text)) throw new Error("Enter Polybius coordinates using digits 1–5, separated into pairs.");
+                const digits = text.replace(/\D/g, "");
+                if (digits.length % 2 !== 0) throw new Error("Polybius ciphertext must contain an even number of coordinate digits.");
+                let result = "";
+                for (let i = 0; i < digits.length; i += 2) {
+                    const row = Number(digits[i]);
+                    const column = Number(digits[i + 1]);
+                    if (row < 1 || row > 5 || column < 1 || column > 5) throw new Error("Each Polybius coordinate must be between 1 and 5.");
+                    result += polybiusAlphabet[(row - 1) * 5 + column - 1];
+                }
+                return result;
+            }
+
+            function run() {
+                setError("");
+                try {
+                    const decrypt = mode === "decrypt";
+                    const operations = { caesar: transformCaesar, mono: transformMono, playfair: transformPlayfair, hill: transformHill, polybius: transformPolybius };
+                    const result = operations[selected](byId("input").value, decrypt);
+                    byId("output").value = result;
+                    describeCount(byId("output-count"), result.length);
+                    byId("result-note").textContent = result.length ? "Complete" : "Empty result";
+                } catch (error) {
+                    byId("output").value = "";
+                    describeCount(byId("output-count"), 0);
+                    byId("result-note").textContent = "Needs attention";
+                    setError(error.message);
+                }
+            }
+
+            document.querySelectorAll(".mode-button").forEach((button) => button.addEventListener("click", () => {
+                mode = button.dataset.mode;
+                document.querySelectorAll(".mode-button").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+                updateLabels();
+                setError("");
+            }));
+            byId("run-button").addEventListener("click", run);
+            byId("input").addEventListener("input", () => describeCount(byId("char-count"), byId("input").value.length));
+            byId("clear-button").addEventListener("click", () => { byId("input").value = ""; byId("output").value = ""; describeCount(byId("char-count"), 0); describeCount(byId("output-count"), 0); setError(""); byId("input").focus(); });
+            byId("copy-button").addEventListener("click", async () => {
+                if (!byId("output").value) return;
+                try {
+                    await navigator.clipboard.writeText(byId("output").value);
+                    byId("result-note").textContent = "Copied";
+                } catch {
+                    byId("output").select();
+                    document.execCommand("copy");
+                    byId("result-note").textContent = "Copied";
+                }
+            });
+
+            renderComparison();
+            selectCipher(selected);
+        })();
+    </script>
+</body>
+
+</html>
